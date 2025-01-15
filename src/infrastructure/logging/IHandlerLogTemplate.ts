@@ -1,0 +1,4 @@
+interface IHandlerLogTemplate {
+    after: string;
+}
+  
