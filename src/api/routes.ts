@@ -10,7 +10,6 @@ import { CreateOrderCommand } from '../application/commands/CreateOrderCommand';
 
 const router = Router();
 
-// Validation Middleware Helper
 function validateRequest(req: Request, res: Response, next: Function): void {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -20,7 +19,6 @@ function validateRequest(req: Request, res: Response, next: Function): void {
   next();
 }
 
-// GET /products with validation for query parameters
 router.get(
   '/products',
   [
@@ -55,7 +53,6 @@ router.get(
   }
 );
 
-// POST /products with validation
 router.post(
   '/products',
   [
@@ -80,7 +77,6 @@ router.post(
   }
 );
 
-// POST /products/:id/restock with validation
 router.post(
   '/products/:id/restock',
   [
@@ -103,7 +99,6 @@ router.post(
   }
 );
 
-// POST /products/:id/sell with validation
 router.post(
   '/products/:id/sell',
   [
@@ -126,7 +121,6 @@ router.post(
   }
 );
 
-// POST /orders with validation
 router.post(
   '/orders',
   [

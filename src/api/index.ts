@@ -7,6 +7,7 @@ import { AddInfrastrucutre } from '../infrastructure/Extensions';
 import { TOKENS } from '../infrastructure/Tokens';
 import { KafkaMessageBroker } from '../infrastructure/services/KafkaMessageBroker';
 import routes from './routes';
+import { config } from '../config';
 
 export const app = express();
 app.use(bodyParser.json());
@@ -14,7 +15,7 @@ app.use('/api', routes);
 
 export async function initializeConnections(): Promise<void> {
   try {
-    await mongoose.connect('mongodb://localhost:27017/inventory');
+    await mongoose.connect(config.MONGODB_URI);
     console.log('Connected to MongoDB successfully.');
 
     const kafkaBroker = Container.get<KafkaMessageBroker>(TOKENS.IMessageBroker);

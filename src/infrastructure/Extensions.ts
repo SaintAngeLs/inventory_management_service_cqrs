@@ -17,12 +17,13 @@ import { OrderRepository } from './repositories/OrderRepository';
 import { IOrderService } from '../application/services/IOrderService';
 import { OrderService } from '../application/services/OrderService';
 import { CreateOrderHandler } from '../application/commands/handlers/CreateOrderHandler';
+import { config } from '../config';
 
 export function AddInfrastrucutre(): void {
   Container.set(TOKENS.IProductRepository, new ProductRepository());
   Container.set(TOKENS.IOrderRepository, new OrderRepository());
 
-  const messageBroker = new KafkaMessageBroker(['localhost:9092']);
+  const messageBroker = new KafkaMessageBroker([config.KAFKA_BROKER]);
   Container.set(TOKENS.IMessageBroker, messageBroker);
 
   const eventBus = new EventBus(messageBroker);
