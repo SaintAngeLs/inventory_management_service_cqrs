@@ -1,7 +1,6 @@
 # Inventory Management Service (CQRS)
 
-This project is a CQRS-based Inventory Management Service that provides APIs for managing products, stock, and orders. Below are the available API endpoints and their respective request examples.
-
+This project is a CQRS-based Inventory Management Service that provides APIs for managing products, stock, and orders. It incorporates **Domain-Driven Design** principles to maintain a clean and scalable architecture, allowing the separation of concerns between the domain, application, and infrastructure layers.
 ---
 
 ## API Endpoints
@@ -148,6 +147,3 @@ POST http://localhost:3000/api/orders
 
 ## License
 This project is licensed under the MIT License.
-```
-
-You can save this content as `README.md` in the root of your project directory.
