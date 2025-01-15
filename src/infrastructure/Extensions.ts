@@ -12,9 +12,15 @@ import { SellProductHandler } from '../application/commands/handlers/SellProduct
 import { GetAllProductsQueryHandler } from './queries/handlers/GetAllProductsQueryHandler';
 import { IProductService } from '../application/services/IProductService';
 import { ProductService } from '../application/services/ProductService';
+import { IOrderRepository } from '../core/repositories/IOrderRepository';
+import { OrderRepository } from './repositories/OrderRepository';
+import { IOrderService } from '../application/services/IOrderService';
+import { OrderService } from '../application/services/OrderService';
+import { CreateOrderHandler } from '../application/commands/handlers/CreateOrderHandler';
 
 export function AddInfrastrucutre(): void {
   Container.set(TOKENS.IProductRepository, new ProductRepository());
+  Container.set(TOKENS.IOrderRepository, new OrderRepository());
 
   const messageBroker = new KafkaMessageBroker(['localhost:9092']);
   Container.set(TOKENS.IMessageBroker, messageBroker);
@@ -25,6 +31,10 @@ export function AddInfrastrucutre(): void {
   const productRepository = Container.get<IProductRepository>(TOKENS.IProductRepository);
   const productService = new ProductService(productRepository);
   Container.set(TOKENS.IProductService, productService);
+
+  const orderRepository = Container.get<IOrderRepository>(TOKENS.IOrderRepository);
+  const orderService = new OrderService(orderRepository);
+  Container.set(TOKENS.IOrderService, orderService);
 
   Container.set(
     TOKENS.CreateProductCommandHandler,
@@ -37,6 +47,10 @@ export function AddInfrastrucutre(): void {
   Container.set(
     TOKENS.SellProductCommandHandler,
     new SellProductHandler(productService, messageBroker)
+  );
+  Container.set(
+    TOKENS.CreateOrderCommandHandler,
+    new CreateOrderHandler(orderService, productService, messageBroker)
   );
 
   Container.set(

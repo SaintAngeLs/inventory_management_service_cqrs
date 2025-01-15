@@ -18,3 +18,4 @@ export * from './exceptions/NegativeStockException';
 
 export * from './repositories/IBaseRepository';
 export * from './repositories/IProductRepository';
+export * from './repositories/IOrderRepository';
