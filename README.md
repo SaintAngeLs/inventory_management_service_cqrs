@@ -1,14 +1,135 @@
-# Inventory Management Service (CQRS)
+# 📦 Inventory Management Service (CQRS + DDD + Event-Driven Architecture)
 
-This project is a CQRS-based Inventory Management Service that provides APIs for managing products, stock, and orders. It incorporates **Domain-Driven Design** principles to maintain a clean and scalable architecture, allowing the separation of concerns between the domain, application, and infrastructure layers.
+A scalable **Inventory Management Service** built with **CQRS**, **Domain-Driven Design (DDD)**, **Kafka event streaming**, **MongoDB**, and **TypeScript**.
+This service handles **product management**, **stock operations**, and **order creation** with a clean, enterprise-grade architecture.
+
 ---
 
-## API Endpoints
+## 🚀 Key Features
 
-### 1. Create Product
-**Endpoint**: `POST /api/products`
+* **CQRS Architecture** (write/read separation)
+* **Domain-Driven Design (DDD)** with Aggregates, Value Objects & Domain Events
+* **Event-Driven** with Kafka producers
+* **MongoDB** persistence with clean repository abstraction
+* **Fully typed (TypeScript)**
+* **Express.js REST API**
+* **Dependency Injection** using `typedi`
+* **Validation** using `express-validator`
+* **Comprehensive error handling**
+* **Extensible infrastructure layer**
+* **Docker support** (Kafka, Zookeeper, MongoDB)
 
-**Request Body**:
+---
+
+## 📚 Table of Contents
+
+1. [Architecture Overview](#-architecture-overview)
+2. [High-Level System Flow](#-high-level-system-flow)
+3. [Tech Stack](#-tech-stack)
+4. [Project Structure](#-project-structure)
+5. [API Endpoints](#-api-endpoints)
+6. [Setup Instructions](#-setup-instructions)
+7. [Environment Variables](#-environment-variables)
+8. [Docker Setup (Kafka + Mongo)](#-docker-setup-kafka--mongo)
+9. [Running the Application](#-running-the-application)
+10. [Event Topics](#-event-topics)
+11. [Testing](#-testing)
+12. [Troubleshooting](#-troubleshooting)
+13. [License](#-license)
+
+---
+
+# 🏗 Architecture Overview
+
+This project follows **CQRS** + **Domain-Driven Design**, splitting responsibilities:
+
+* **Commands** modify state (Create Product, Restock, Sell, Create Order)
+* **Queries** retrieve data
+* **Domain Layer** contains business rules & aggregates
+* **Infrastructure Layer** handles Kafka, MongoDB, repositories
+* **Application Layer** orchestrates commands, events & services
+
+---
+
+### 🧩 Architectural Diagram (Conceptual)
+
+```
+        ┌─────────────────────────┐
+        │        API Layer        │
+        │  Express.js Controllers │
+        └─────────────┬──────────┘
+                      │
+                      ▼
+        ┌─────────────────────────┐
+        │   Application Layer     │
+        │ Commands | Queries | DTO │
+        └─────────────┬──────────┘
+                      │
+                      ▼
+        ┌─────────────────────────┐
+        │      Domain Layer       │
+        │ Aggregates | Events     │
+        └─────────────┬──────────┘
+                      │
+                      ▼
+      ┌───────────────────────────────┐
+      │     Infrastructure Layer       │
+      │ MongoDB | Kafka | Repositories │
+      └───────────────────────────────┘
+```
+
+---
+
+# ⚙ Tech Stack
+
+| Category  | Technology                          |
+| --------- | ----------------------------------- |
+| Language  | **TypeScript**                      |
+| Runtime   | **Node.js**                         |
+| Framework | **Express.js**                      |
+| Patterns  | **CQRS**, **DDD**, **Event-Driven** |
+| Database  | **MongoDB**                         |
+| Messaging | **Kafka**                           |
+| DI        | **typedi**                          |
+| Testing   | **Jest**                            |
+| Dev Tools | Docker, ESLint, Prettier            |
+
+---
+
+# 📁 Project Structure
+
+```
+src
+├── api
+├── application
+│   ├── commands
+│   ├── queries
+│   ├── events
+│   ├── services
+│   └── dto
+├── core
+│   ├── entities
+│   ├── events
+│   ├── repositories
+│   └── exceptions
+└── infrastructure
+    ├── database
+    ├── services
+    ├── logging
+    ├── queries
+    └── repositories
+```
+
+This structure fully supports **scalable enterprise systems**.
+
+---
+
+# 🔌 API Endpoints
+
+## 1. Create Product
+
+**POST** `/api/products`
+
 ```json
 {
   "name": "Test Product",
@@ -20,25 +141,19 @@ This project is a CQRS-based Inventory Management Service that provides APIs for
 
 ---
 
-### 2. Get All Products
-**Endpoint**: `GET /api/products`
+## 2. Get All Products
 
-**Example Request**:
-```sh
-GET http://localhost:3000/api/products
-```
+**GET** `/api/products`
+
+Supports:
+`page`, `pageSize`, `sortBy`, `sortDirection`
 
 ---
 
-### 3. Restock Product
-**Endpoint**: `POST /api/products/:id/restock`
+## 3. Restock Product
 
-**Request Example**:
-```sh
-POST http://localhost:3000/api/products/6787d931083d883262b4cd70/restock
-```
+**POST** `/api/products/:id/restock`
 
-**Request Body**:
 ```json
 {
   "amount": 5
@@ -47,15 +162,10 @@ POST http://localhost:3000/api/products/6787d931083d883262b4cd70/restock
 
 ---
 
-### 4. Sell Product
-**Endpoint**: `POST /api/products/:id/sell`
+## 4. Sell Product
 
-**Request Example**:
-```sh
-POST http://localhost:3000/api/products/6787d931083d883262b4cd70/sell
-```
+**POST** `/api/products/:id/sell`
 
-**Request Body**:
 ```json
 {
   "amount": 5
@@ -64,86 +174,132 @@ POST http://localhost:3000/api/products/6787d931083d883262b4cd70/sell
 
 ---
 
-### 5. Create Order
-**Endpoint**: `POST /api/orders`
+## 5. Create Order
 
-**Request Example**:
-```sh
-POST http://localhost:3000/api/orders
-```
+**POST** `/api/orders`
 
-**Request Body**:
 ```json
 {
   "customerId": "123e4567-e89b-12d3-a456-426614174000",
   "products": [
-    {
-      "productId": "6787d931083d883262b4cd70",
-      "quantity": 2
-    },
-    {
-      "productId": "6787d93b083d883262b4cd73",
-      "quantity": 1
-    },
-    {
-      "productId": "6787dbc126686db4e7672984",
-      "quantity": 3
-    }
+    { "productId": "6787d931083d883262b4cd70", "quantity": 2 },
+    { "productId": "6787d93b083d883262b4cd73", "quantity": 1 }
   ]
 }
 ```
 
 ---
 
+# 🛠 Setup Instructions
 
-## Setup Instructions
+### 1. Clone the repository
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/SaintAngeLs/inventory_management_service_cqrs.git
-   cd inventory_management_service_cqrs
-   ```
+```bash
+git clone https://github.com/SaintAngeLs/inventory_management_service_cqrs.git
+cd inventory_management_service_cqrs
+```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+### 2. Install dependencies
 
-3. Set up your `.env` file with the necessary environment variables:
-   ```plaintext
-   MONGO_URI=mongodb://localhost:27017/inventory
-   KAFKA_BROKER=localhost:9092
-   PORT=3000
-   ```
+```bash
+npm install
+```
 
-4. If MongoDB or Kafka is not available on your system, use `docker-compose` to set up the required services. Run the following command:
-   ```bash
-   docker-compose up -d
-   ```
+### 3. Create `.env`
 
-   This will start the following services:
-   - **Zookeeper**: Required by Kafka.
-   - **Kafka**: The message broker for the system.
-   - **Kafka-UI**: A user interface to monitor Kafka.
-   - *(Optional)* Uncomment the `mongo` and `mongo-express` services in `docker-compose.yml` to run a MongoDB instance with a web-based admin interface.
-
-5. Start the application server:
-   ```bash
-   npm run dev
-   ```
-
-6. Run tests to verify the setup:
-   ```bash
-   npm test
-   ```
+```env
+MONGO_URI=mongodb://localhost:27017/inventory
+KAFKA_BROKER=localhost:9092
+PORT=3000
+```
 
 ---
 
-## Notes
-- Ensure MongoDB and Kafka are running locally or update the configuration in `src/config.ts`.
-- Use tools like Postman, Insomnia, or cURL to interact with the API.
+# 🐳 Docker Setup (Kafka + Zookeeper + MongoDB)
+
+Start infrastructure services:
+
+```bash
+docker-compose up -d
+```
+
+Services included:
+
+* Kafka
+* Zookeeper
+* Kafka-UI
+* (Optional) MongoDB + Mongo Express
 
 ---
 
-## License
-This project is licensed under the MIT License.
+# ▶ Running the Application
+
+### Development mode
+
+```bash
+npm run dev
+```
+
+### Production build
+
+```bash
+npm run build
+npm start
+```
+
+---
+
+# 📡 Kafka Event Topics
+
+| Event                 | Topic               |
+| --------------------- | ------------------- |
+| ProductCreatedEvent   | `product.created`   |
+| ProductRestockedEvent | `product.restocked` |
+| ProductSoldEvent      | `product.sold`      |
+| OrderCreatedEvent     | `order.created`     |
+
+Every write operation triggers a domain event, then publishes to Kafka.
+
+---
+
+# 🧪 Testing
+
+Run all tests:
+
+```bash
+npm test
+```
+
+Test environment uses **supertest + jest**.
+
+---
+
+# 🐞 Troubleshooting
+
+### Kafka connection errors
+
+Ensure Zookeeper & Kafka are running:
+
+```bash
+docker ps
+```
+
+### MongoDB connection refused
+
+```bash
+docker-compose up -d mongo
+```
+
+### TypeScript compilation issue
+
+```bash
+npm run build
+```
+
+---
+
+# 📄 License
+
+MIT License – free to use & modify.
+
+---
